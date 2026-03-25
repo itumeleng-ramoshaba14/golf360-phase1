@@ -37,6 +37,7 @@ public class DataSeeder implements CommandLineRunner {
         championship.setProvince("Gauteng");
         championship.setCountry("South Africa");
         championship.setDescription("Premium championship golf course with tournament-ready fairways.");
+        championship.setHoles(18);
         championship.setImageUrl(
                 "https://images.unsplash.com/photo-1535131749006-b7f58c99034b?q=80&w=1400&auto=format&fit=crop");
         championship = courseRepository.save(championship);
@@ -47,6 +48,7 @@ public class DataSeeder implements CommandLineRunner {
         executive.setProvince("Gauteng");
         executive.setCountry("South Africa");
         executive.setDescription("Accessible executive course suited for social and business rounds.");
+        executive.setHoles(9);
         executive.setImageUrl(
                 "https://images.unsplash.com/photo-1551963831-b3b1ca40c98e?q=80&w=1400&auto=format&fit=crop");
         executive = courseRepository.save(executive);
