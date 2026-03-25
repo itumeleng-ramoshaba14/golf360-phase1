@@ -1,17 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useToast } from "@/components/ToastProvider";
 import { getMyGroups, type GolfGroup } from "@/lib/groups";
 import { api } from "@/lib/api";
-import { createRound, getMyRounds, type GameFormat, type RoundSummary } from "@/lib/rounds";
+import {
+  createRound,
+  getMyRounds,
+  type GameFormat,
+  type RoundSummary,
+} from "@/lib/rounds";
 import { formatDateTime } from "@/lib/formatters";
 import { getSession } from "@/lib/sessions";
 
 type Course = { id: string; name: string };
-type UserOption = { id: string; fullName: string; email: string; handicap?: number | null };
+type UserOption = {
+  id: string;
+  fullName: string;
+  email: string;
+  handicap?: number | null;
+};
 
 const FORMATS: GameFormat[] = [
   "STROKE_PLAY",
@@ -21,7 +31,7 @@ const FORMATS: GameFormat[] = [
   "SOCIAL_4BALL",
 ];
 
-export default function RoundsPage() {
+function RoundsPageContent() {
   const { showToast } = useToast();
   const searchParams = useSearchParams();
 
@@ -39,10 +49,14 @@ export default function RoundsPage() {
   const [guestNames, setGuestNames] = useState(guestNamesFromQuery);
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<string[]>([]);
   const [form, setForm] = useState({
-    name: bookingIdFromQuery ? `Round for Booking ${bookingIdFromQuery.slice(0, 8)}` : "Saturday Fourball",
+    name: bookingIdFromQuery
+      ? `Round for Booking ${bookingIdFromQuery.slice(0, 8)}`
+      : "Saturday Fourball",
     courseId: courseIdFromQuery,
     groupId: "",
-    scheduledAt: scheduledAtFromQuery ? scheduledAtFromQuery.slice(0, 16) : "",
+    scheduledAt: scheduledAtFromQuery
+      ? scheduledAtFromQuery.slice(0, 16)
+      : "",
     format: "SOCIAL_4BALL" as GameFormat,
   });
 
@@ -88,7 +102,10 @@ export default function RoundsPage() {
     loadData()
       .catch((error: any) => {
         console.error("Failed to load rounds", error);
-        showToast(error?.response?.data?.message || "Failed to load rounds", "error");
+        showToast(
+          error?.response?.data?.message || "Failed to load rounds",
+          "error"
+        );
       })
       .finally(() => setLoading(false));
   }, [showToast]);
@@ -124,7 +141,8 @@ export default function RoundsPage() {
   }, [form.groupId, groups, players]);
 
   const selectedCourseName =
-    courses.find((course) => course.id === form.courseId)?.name || courseNameFromQuery;
+    courses.find((course) => course.id === form.courseId)?.name ||
+    courseNameFromQuery;
 
   const togglePlayer = (playerId: string) => {
     setSelectedPlayerIds((current) =>
@@ -164,7 +182,10 @@ export default function RoundsPage() {
       window.location.href = `/rounds/${created.id}`;
     } catch (error: any) {
       console.error("Failed to create round", error);
-      showToast(error?.response?.data?.message || "Failed to create round", "error");
+      showToast(
+        error?.response?.data?.message || "Failed to create round",
+        "error"
+      );
     }
   };
 
@@ -181,7 +202,8 @@ export default function RoundsPage() {
       <header style={headerStyle}>
         <h1 style={titleStyle}>Rounds</h1>
         <p style={subtitleStyle}>
-          Create a golf round, add players, capture scores, and track performance over time.
+          Create a golf round, add players, capture scores, and track
+          performance over time.
         </p>
       </header>
 
@@ -217,7 +239,9 @@ export default function RoundsPage() {
               <input
                 style={inputStyle}
                 value={form.name}
-                onChange={(e) => setForm((current) => ({ ...current, name: e.target.value }))}
+                onChange={(e) =>
+                  setForm((current) => ({ ...current, name: e.target.value }))
+                }
                 placeholder="Saturday Fourball"
               />
             </div>
@@ -227,7 +251,12 @@ export default function RoundsPage() {
               <select
                 style={inputStyle}
                 value={form.courseId}
-                onChange={(e) => setForm((current) => ({ ...current, courseId: e.target.value }))}
+                onChange={(e) =>
+                  setForm((current) => ({
+                    ...current,
+                    courseId: e.target.value,
+                  }))
+                }
               >
                 <option value="">Select course</option>
                 {courses.map((course) => (
@@ -265,7 +294,12 @@ export default function RoundsPage() {
                 type="datetime-local"
                 style={inputStyle}
                 value={form.scheduledAt}
-                onChange={(e) => setForm((current) => ({ ...current, scheduledAt: e.target.value }))}
+                onChange={(e) =>
+                  setForm((current) => ({
+                    ...current,
+                    scheduledAt: e.target.value,
+                  }))
+                }
               />
             </div>
 
@@ -275,7 +309,10 @@ export default function RoundsPage() {
                 style={inputStyle}
                 value={form.format}
                 onChange={(e) =>
-                  setForm((current) => ({ ...current, format: e.target.value as GameFormat }))
+                  setForm((current) => ({
+                    ...current,
+                    format: e.target.value as GameFormat,
+                  }))
                 }
               >
                 {FORMATS.map((format) => (
@@ -290,7 +327,9 @@ export default function RoundsPage() {
               <p style={labelStyle}>Add registered players</p>
               <div style={chipWrapStyle}>
                 {availablePlayers.length === 0 ? (
-                  <div style={emptyStateStyle}>No group members available yet.</div>
+                  <div style={emptyStateStyle}>
+                    No group members available yet.
+                  </div>
                 ) : (
                   availablePlayers.map((player) => (
                     <button
@@ -344,21 +383,32 @@ export default function RoundsPage() {
           </div>
 
           {rounds.length === 0 ? (
-            <div style={emptyStateStyle}>No rounds yet. Create one to start scoring.</div>
+            <div style={emptyStateStyle}>
+              No rounds yet. Create one to start scoring.
+            </div>
           ) : (
             <div style={{ display: "grid", gap: 12 }}>
               {rounds.map((round) => (
-                <Link key={round.id} href={`/rounds/${round.id}`} style={listCardStyle}>
+                <Link
+                  key={round.id}
+                  href={`/rounds/${round.id}`}
+                  style={listCardStyle}
+                >
                   <div>
-                    <strong style={{ color: "white", display: "block" }}>{round.name}</strong>
+                    <strong style={{ color: "white", display: "block" }}>
+                      {round.name}
+                    </strong>
                     <span style={{ color: "#cbd5e1" }}>
-                      {round.courseName || "Course TBD"} • {round.participantCount} players
+                      {round.courseName || "Course TBD"} •{" "}
+                      {round.participantCount} players
                     </span>
                   </div>
                   <div style={{ textAlign: "right" }}>
                     <div style={pillStyle}>{round.status}</div>
                     <p style={{ color: "#cbd5e1", margin: "8px 0 0" }}>
-                      {round.scheduledAt ? formatDateTime(round.scheduledAt) : "Schedule not set"}
+                      {round.scheduledAt
+                        ? formatDateTime(round.scheduledAt)
+                        : "Schedule not set"}
                     </p>
                   </div>
                 </Link>
@@ -371,22 +421,58 @@ export default function RoundsPage() {
   );
 }
 
-const pageStyle: React.CSSProperties = { padding: 24, maxWidth: 1280, margin: "0 auto" };
+export default function RoundsPage() {
+  return (
+    <Suspense
+      fallback={
+        <main style={pageStyle}>
+          <p style={{ color: "white" }}>Loading rounds...</p>
+        </main>
+      }
+    >
+      <RoundsPageContent />
+    </Suspense>
+  );
+}
+
+const pageStyle: React.CSSProperties = {
+  padding: 24,
+  maxWidth: 1280,
+  margin: "0 auto",
+};
+
 const headerStyle: React.CSSProperties = { marginBottom: 24 };
-const titleStyle: React.CSSProperties = { color: "white", fontSize: 42, margin: 0 };
-const subtitleStyle: React.CSSProperties = { color: "#cbd5e1", lineHeight: 1.6, margin: "8px 0 0" };
+
+const titleStyle: React.CSSProperties = {
+  color: "white",
+  fontSize: 42,
+  margin: 0,
+};
+
+const subtitleStyle: React.CSSProperties = {
+  color: "#cbd5e1",
+  lineHeight: 1.6,
+  margin: "8px 0 0",
+};
+
 const gridStyle: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
   gap: 24,
 };
+
 const panelStyle: React.CSSProperties = {
   background: "rgba(255,255,255,0.04)",
   border: "1px solid rgba(255,255,255,0.1)",
   borderRadius: 24,
   padding: 24,
 };
-const sectionTitleStyle: React.CSSProperties = { color: "white", marginTop: 0 };
+
+const sectionTitleStyle: React.CSSProperties = {
+  color: "white",
+  marginTop: 0,
+};
+
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "14px 16px",
@@ -396,6 +482,7 @@ const inputStyle: React.CSSProperties = {
   color: "white",
   boxSizing: "border-box",
 };
+
 const primaryButtonStyle: React.CSSProperties = {
   padding: "14px 18px",
   borderRadius: 14,
@@ -405,8 +492,19 @@ const primaryButtonStyle: React.CSSProperties = {
   fontWeight: 800,
   cursor: "pointer",
 };
-const labelStyle: React.CSSProperties = { color: "white", fontWeight: 700, margin: "0 0 10px" };
-const chipWrapStyle: React.CSSProperties = { display: "flex", flexWrap: "wrap", gap: 10 };
+
+const labelStyle: React.CSSProperties = {
+  color: "white",
+  fontWeight: 700,
+  margin: "0 0 10px",
+};
+
+const chipWrapStyle: React.CSSProperties = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 10,
+};
+
 const chipStyle: React.CSSProperties = {
   padding: "10px 12px",
   borderRadius: 999,
@@ -414,6 +512,7 @@ const chipStyle: React.CSSProperties = {
   color: "white",
   cursor: "pointer",
 };
+
 const pillStyle: React.CSSProperties = {
   display: "inline-block",
   padding: "6px 10px",
@@ -423,12 +522,14 @@ const pillStyle: React.CSSProperties = {
   fontWeight: 700,
   fontSize: 12,
 };
+
 const emptyStateStyle: React.CSSProperties = {
   color: "#cbd5e1",
   padding: 18,
   borderRadius: 16,
   border: "1px dashed rgba(255,255,255,0.15)",
 };
+
 const listCardStyle: React.CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
