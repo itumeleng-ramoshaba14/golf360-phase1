@@ -1,0 +1,36 @@
+# Node
+node_modules/
+.next/
+out/
+
+# Java / Maven
+target/
+*.class
+
+# Logs
+*.log
+
+# Env
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Archives / large extras
+*.zip
+*.rar
+*.7z
+*.mp4
+*.mov
+*.avi
+
+# Optional docs not needed for deploy
+*.pdf
+*.pptx
